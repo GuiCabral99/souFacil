@@ -5,33 +5,18 @@ namespace App\Http\Controllers;
 use App\Models\Client;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class ClientController extends Controller
 {
-
-
-
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function index(): View
     {
-        $user = Auth::user();
-        $clients = Client::where('user_id', $user->id)->get();
+        $clients = Client::where('user_id', Auth::id())->get();
         return view('clients', compact('clients'));
     }
 
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
+    public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
@@ -40,37 +25,24 @@ class ClientController extends Controller
             'document' => 'required|string|max:20|unique:clients,document',
             'documentType' => 'required|string|in:cpf,cnpj',
         ]);
-        
-        $client = new Client($validated);
-        $client->user_id = Auth::id();
-        $client->save();
-    
+
+        $validated['user_id'] = Auth::id();
+        Client::create($validated);
+
         return redirect()->route('clients.index')->with('success', 'Cliente cadastrado com sucesso!');
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Client $client)
+    public function show(Client $client): View
     {
-        //
+        $this->authorizeClient($client);
+        $client->load('sales');
+        return view('client', compact('client'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Client $client)
+    public function update(Request $request, int $id): RedirectResponse
     {
-        //
-    }
+        $client = $this->findAuthorizedClient($id);
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, $id)
-    {
-        $client = Client::where('user_id', Auth::id())->findOrFail($id);
-    
         $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'phone_number' => 'required|string|max:20',
@@ -78,17 +50,31 @@ class ClientController extends Controller
             'document' => 'required|string|max:20|unique:clients,document,' . $client->id,
             'documentType' => 'required|string|in:cpf,cnpj',
         ]);
-    
+
         $client->update($validated);
-        return redirect()->route('clients.index');
+
+        return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso!');
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy($client)
+    public function destroy(int $id): RedirectResponse
     {
-        Client::where('user_id', Auth::id())->findOrFail($client)->delete();
-        return redirect()->route('clients.index');
+        $client = $this->findAuthorizedClient($id);
+        $client->delete();
+
+        return redirect()->route('clients.index')->with('success', 'Cliente excluído com sucesso!');
+    }
+
+    private function authorizeClient(Client $client): void
+    {
+        if ($client->user_id !== Auth::id()) {
+            abort(403, 'Acesso não autorizado.');
+        }
+    }
+
+    private function findAuthorizedClient(int $id): Client
+    {
+        $client = Client::findOrFail($id);
+        $this->authorizeClient($client);
+        return $client;
     }
 }

@@ -6,68 +6,98 @@ use App\Models\User as UserModel;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
-    function showLoginForm() {
-        if(Auth::check()) {
-            return redirect()->route('clients.index');
-        }
-        return view('auth');
+    public function showLoginForm(): RedirectResponse|View
+    {
+        return Auth::check()
+            ? redirect()->route('clients.index')
+            : view('auth');
     }
 
-    function login(Request $req) {
-        if(Auth::check()) {
+    public function login(Request $request): RedirectResponse
+    {
+        if (Auth::check()) {
             return redirect()->route('clients.index');
         }
-        $validated = $req->validate([
+
+        $credentials = $request->validate([
             'email' => 'required|email',
-            'password' => 'required|string|min:6'
+            'password' => 'required|string|min:6',
         ]);
-        $user = UserModel::where('email', $validated["email"])->first();
 
-        if ($user && Hash::check($validated["password"], $user->password)){
+        $user = UserModel::where('email', $credentials['email'])->first();
+
+        if ($user && Hash::check($credentials['password'], $user->password)) {
             Auth::login($user);
-            return redirect()->route("clients.index");
-        } 
-        if (!$user || !Hash::check($validated["password"], $user->password)) {
-            return back()->withErrors(['email' => 'Credenciais inválidas.']);
+            return redirect()->route('clients.index');
         }
+
+        return back()->withErrors(['email' => 'Credenciais inválidas.']);
     }
 
-    public function logout() {
+    public function logout(): RedirectResponse
+    {
         Auth::logout();
         return redirect()->route('login');
     }
 
-    public function showRegistrationForm()
+    public function showRegistrationForm(): RedirectResponse|View
     {
-        if(Auth::check()) {
-            return redirect()->route('clients.index');
-        }
-        return view('user');
+        return Auth::check()
+            ? redirect()->route('clients.index')
+            : view('user');
     }
 
-    public function register(Request $req)
+    public function register(Request $request): RedirectResponse
     {
-        if(Auth::check()) {
+        if (Auth::check()) {
             return redirect()->route('clients.index');
         }
-        
-        $validated = $req->validate([
+
+        $validated = $request->validate([
             'first_name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:6|confirmed'
+            'password' => 'required|string|min:6|confirmed',
         ]);
 
         $user = UserModel::create([
-            "first_name" =>  $validated ["first_name"],
-            "email"=> $validated["email"],
-            "password"=>bcrypt($validated["password"])]
-        );
+            'first_name' => $validated['first_name'],
+            'email' => $validated['email'],
+            'password' => Hash::make($validated['password']),
+        ]);
 
         Auth::login($user);
 
-        return redirect()->route("clients.index");
+        return redirect()->route('clients.index');
+    }
+
+    public function update(Request $request): RedirectResponse
+    {
+        $user = Auth::user();
+
+        $validated = $request->validate([
+            'first_name' => 'required|string|max:255',
+            'email' => 'required|email|unique:users,email,' . $user->id,
+        ]);
+
+        $user->update([
+            'first_name' => $validated['first_name'],
+            'email' => $validated['email'],
+        ]);
+
+        return back()->with('status', 'Conta atualizada com sucesso.');
+    }
+
+    public function destroy(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        Auth::logout();
+        $user->delete();
+
+        return redirect()->route('auth')->with('status', 'Conta excluída com sucesso.');
     }
 }
