@@ -53,7 +53,7 @@ class ClientController extends Controller
 
         $client->update($validated);
 
-        return redirect()->route('clients.index')->with('success', 'Cliente atualizado com sucesso!');
+        return redirect()->back()->with('success', 'Cliente atualizado com sucesso!');
     }
 
     public function destroy(int $id): RedirectResponse

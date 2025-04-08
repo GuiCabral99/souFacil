@@ -49,15 +49,18 @@ class SaleController extends Controller
     public function update(Request $request, Sale $sale): RedirectResponse
     {
         $this->authorizeClient($sale->client);
-
+    
         $validated = $request->validate([
             'amount' => 'required|numeric',
+            'date' => 'required|date',
+            'received' => 'required|boolean',
         ]);
-
+    
         $sale->update($validated);
-
+    
         return redirect()->route('clients.show', $sale->client_id)->with('success', 'Venda atualizada!');
     }
+    
 
     public function destroy(Sale $sale): RedirectResponse
     {

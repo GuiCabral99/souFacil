@@ -32,6 +32,6 @@ class AdminUserController extends Controller
     {
         $user->delete();
 
-        return redirect()->route('admin')->with('success', 'Usuário excluído!');
+        return redirect()->back()->with('success', 'Usuário excluído!');
     }
 }

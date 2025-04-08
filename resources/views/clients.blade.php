@@ -12,13 +12,9 @@
 
             @auth
             <div class="flex flex-wrap gap-4 items-center justify-center md:justify-end">
-                <form method="POST" action="{{ route('user.destroy') }}" onsubmit="return confirm('Tem certeza que deseja excluir sua conta?')">
-                    @csrf
-                    @method('DELETE')
-                    <button class="px-4 py-2 border border-red-400 text-red-600 rounded-md hover:bg-red-100">
-                        Excluir Conta
-                    </button>
-                </form>
+                <a href="{{ route('user.edit') }}" class="px-4 py-2 border border-blue-500 text-blue-600 rounded-md hover:bg-blue-100">
+                    Editar Conta
+                </a>
 
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf

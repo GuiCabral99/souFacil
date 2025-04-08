@@ -55,7 +55,7 @@
                 @forelse ($sales as $sale)
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2">{{ $sale->client->first_name }}</td>
-                        <td class="px-4 py-2">R$ {{ number_format($sale->value, 2, ',', '.') }}</td>
+                        <td class="px-4 py-2">R$ {{ number_format($sale->amount, 2, ',', '.') }}</td>
                         <td class="px-4 py-2">{{ \Carbon\Carbon::parse($sale->date)->format('d/m/Y') }}</td>
                         <td class="px-4 py-2">
                             @if ($sale->received)

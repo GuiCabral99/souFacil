@@ -22,6 +22,11 @@ Route::delete('/user', [UserController::class, 'destroy'])->name('user.destroy')
 
 // Rotas autenticadas
 Route::middleware('auth')->group(function () {
+    Route::get('/user/edit', [UserController::class, 'edit'])->name('user.edit');
+    Route::put('/user/update', [UserController::class, 'update'])->name('user.update');
+    Route::put('/user/password', [UserController::class, 'updatePassword'])->name('user.password.update');
+    Route::delete('/user/destroy', [UserController::class, 'destroy'])->name('user.destroy');
+
     Route::resource("clients", ClientController::class);
 
     Route::resource("sales", SaleController::class);

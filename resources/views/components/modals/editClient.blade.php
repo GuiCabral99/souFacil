@@ -6,7 +6,16 @@
           &times;
         </button>
       </div>
-  
+      @if ($errors->any())
+        <div class="bg-red-100 border border-red-400 text-red-700 px-4 py-2 rounded relative mb-4">
+            <ul class="list-disc list-inside text-sm">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+      @endif
+
       <form id="editForm" method="POST" class="space-y-4 mt-4">
         @csrf
         @method('PUT')
@@ -16,18 +25,21 @@
         <div>
           <label for="first_name" class="block text-sm font-medium text-gray-700">Nome</label>
           <input type="text" id="first_name" name="first_name" required
+                 value="{{ old('first_name', $client->first_name ?? '') }}"
                  class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
         </div>
   
         <div>
           <label for="phone_number" class="block text-sm font-medium text-gray-700">Telefone</label>
           <input type="text" id="phone_number" name="phone_number" required
+                 value="{{ old('phone_number', $client->phone_number ?? '') }}"
                  class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
         </div>
   
         <div>
           <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
           <input type="email" id="email" name="email" required
+                 value="{{ old('email', $client->email ?? '') }}"
                  class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
         </div>
   
@@ -35,15 +47,17 @@
           <div class="w-full">
             <label for="document" class="block text-sm font-medium text-gray-700">Documento</label>
             <input type="text" id="document" name="document" required
+                   value="{{ old('document', $client->document ?? '') }}"
                    class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
           </div>
   
           <div class="w-2/5">
             <label for="documentType" class="block text-sm font-medium text-gray-700">Tipo de Documento</label>
             <select id="documentType" name="documentType" required
+                    
                     class="mt-1 block w-full border border-gray-300 rounded-md p-2 shadow-sm focus:ring-blue-500 focus:border-blue-500">
-              <option value="cpf">CPF</option>
-              <option value="cnpj">CNPJ</option>
+                    <option value="cpf" {{ old('documentType', $client->documentType ?? '') === 'cpf' ? 'selected' : '' }}>CPF</option>
+                    <option value="cnpj" {{ old('documentType', $client->documentType ?? '') === 'cnpj' ? 'selected' : '' }}>CNPJ</option>
             </select>
           </div>
         </div>
@@ -61,4 +75,3 @@
       </form>
     </div>
   </div>
-  

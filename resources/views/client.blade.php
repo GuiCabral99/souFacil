@@ -61,7 +61,7 @@
                         <p><strong>ID:</strong> {{ $sale->id }}</p>
                         <p><strong>Valor:</strong> R$ {{ number_format($sale->amount, 2, ',', '.') }}</p>
                         <p><strong>Status:</strong> {{ $sale->received ? 'Recebido' : 'Pendente' }}</p>
-                        <p><strong>Data:</strong> {{ $sale->date }}</p>
+                        <p><strong>Data:</strong> {{ $sale->date->format('d/m/Y') }}</p>
                     </button>
                 @endforeach
             </ul>
@@ -76,18 +76,25 @@
 
 
 <script>
-    function openEditSaleModal(sale) {
-        const modal = document.getElementById('editSaleModal');
-        modal.classList.remove('hidden');
-        modal.classList.add('flex');
+function openEditSaleModal(sale) {
+    const modal = document.getElementById('editSaleModal');
+    modal.classList.remove('hidden');
+    modal.classList.add('flex');
 
-        document.getElementById('edit_amount').value = sale.amount;
-        document.getElementById('edit_date').value = sale.date;
-        document.getElementById('edit_received').value = sale.received ? 1 : 0;
-        document.getElementById('edit_client_id').value = sale.client_id;
-
-        document.getElementById('editSaleForm').action = `/sales/${sale.id}`;
+    document.getElementById('edit_amount').value = sale.amount;
+    const editDateInput = document.getElementById('edit_date');
+    if (sale.date) {
+        const [year, month, day] = sale.date.split('T')[0].split('-');
+        editDateInput.value = `${year}-${month}-${day}`;
     }
+    document.getElementById('edit_received').value = sale.received ? 1 : 0;
+    document.getElementById('edit_client_id').value = sale.client_id;
+
+    // Configura os actions dos formulários
+    const saleId = sale.id;
+    document.getElementById('editSaleForm').action = `/sales/${saleId}`;
+    document.getElementById('deleteSaleForm').action = `/sales/${saleId}`;
+}
 
     function openModal(modalId) {
         const modal = document.getElementById(modalId);
